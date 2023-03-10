@@ -1,0 +1,93 @@
+TEMA 1: SISTEMUL LUI BIJU
+MATERIE: IOCLA
+STUDENTA: CHIPER IOANA-CRISTINA
+GRUPA: 322 CD
+
+IMPLEMENTARE:
+    - nu au fost folosite structuri de date aditionale
+    - alocarea memoriei a fost realizata cu functia malloc(...)
+    - a fost definita inca o constanta MAX_NAME_SIZE utilizata pentru 
+      alocarea memoriei string-urilor ce reprezinta numele fisierelor
+      sau directoarelor
+    - pentru simularea sistemului de fisiere am alocat in main directorul 
+      "home" si inca un pointer currentDir prin care simulam pozitionarea 
+      noastra in sistemul de fisiere si operatiile pe care le facem. (pointer-ul
+      home ar trebui vazut ca ceva ce nu schimbam indiferent de ce director 
+      adaugam/creeam/stergem in sistemul de fisiere sau unde ne aflam, 
+      oarecum ca ~ care indica mereu home-ul).
+    - toti pointerii tmp sunt folositi pentru parcurgerea listelor si de aceea 
+      nu au nume semnificative
+    - citirile de input se realizeaza pana la intalnirea comenzii stop
+    - partitionarea input-ului in comanda si parametrii se realizeaza, dupa determinarea 
+      comenzii pentru a sti numarul de parametri asteptati, cu ajutorul functiei 
+      sscanf(...).
+FUNCTII ADITIONALE GENERALE: 
+    - pentru a determina daca un fisier sau director exista in directorul
+      parinte s-au creat doua functii aditionale, searchFileInDir(...) si 
+      searchDirInDir(...), care parcurg listele de fisere, respectiv 
+      directoare din parinte 
+    - pentru dezalocarea memoriei unui director (inclusiv a ceea ce se 
+      afla in interiorul acestuia) a fost creata functia deallocDir(...).
+      Aceasta functie este recursiva. In momentul in care ajunge la un 
+      director ce nu mai are directoare in el elimina toate file-urile 
+      (se bazeaza pe functia rm care a fost implementata in asa fel incat
+      realizeaza si dezalocarea memoriei pentru file-ul pe care il sterge),
+      apoi se intoarce in parent ia urmatorul director si ii dezaloca 
+      memoria celui care acum suntem siguri ca este gol.
+ALTE EXPLICATII FUNCTII: 
+    - TOUCH: Pentru implementarea acestei functii a fost creata si o functie
+        aditionala, addFile(...). Aceasta functie aloca si initializeaza un 
+        nou file, care este apoi adaugat in lista de file-uri a parintelui. 
+        Apoi se returneaza aceasta lista modificata. In functia touch(...) se 
+        verifica daca exista deja un file sau un director cu numele primit, 
+        pentru cazul afirmativ returnandu-se mesaj de eroare, iar in caz 
+        contrar se actualizeaza lista de fisiere cu ajutorul functiei 
+        mentionate mai sus.
+    - MKDIR: Similar, a fost creata functie aditionala addDir(...), care aloca,
+        initializeaza si insereaza in lista parintelui un nou director cu numele
+        primit pe care o returneaza. In functia mkdir(...) se verifica daca numele 
+        primit a fost deja folosit in parinte, in caz contrar actualizandu-se lista 
+        de directoare a parintelui cu ajutorul functiei mai sus mentionate.
+    - LS: Parcurge lista de directoare a parintelui si afiseaza numele acestora, 
+        apoi reia aceleasi actiuni pentru file-uri
+    - RM: Functia rm verifica daca file-ul de sters exista in lista parintelui, in 
+        cazul ca da folosindu-se de functia aditionala rmFile(...) pentru stergerera
+        si dezalocarea memoriei acelui file. rmFile(...) identifica pozitia in lista
+        a file-ului de sters, ii elimina legaturile cu celelalte elemente ale listei,
+        ii dezaloca memoria, iar in final returneaza lista de fisiere actualizata.
+    - RMDIR: Functia verifica daca directorul de sters exista in lista parintelui,
+        in cazul ca da folosindu-se de functia aditionala rmThisDir(...), care 
+        foloseste acelasi principiu ca rmFile(...), singura diferenta fiind dezalocarea 
+        memoriei prin intermediul functiei aditionale deallocDir(...).
+    - CD: In cazul in care se doreste urcarea in ierarhie cu .. se verifica mai intai 
+        daca exista parintele (ne oprim daca suntem deja in home, care este root-ul 
+        ierarhiei noastre). Altfel, daca directorul nu exista, afisam mesaj de eroare. 
+        Daca exista ii gasim adresa, cautandu-l in lista de directoare si schimbam cu 
+        aceasta adresa pointer-ul directorului curent.
+    - PWD: Ne folosim de doua string-uri. Pornind de la target urcam spre home in 
+        ierarhie, adaugand numele directorului in care am ajuns in path1 dupa care
+        concatenam continutul lui path2, care reprezinta calea pana la pasul precedent.
+        La final se dezaloca memoria pentru stringul ce nu contine calea finala si il
+        returnam pe celalalt.
+    - STOP: Dealoca memoria pentru intreaga ierarhie. Functia stop a fost gandita pentru a
+        primi intotdeauna ca parametru radacina ierarhiei de fisiere, adica pointer-ul home
+        depre care am mentionat la implementare. De asemenea, opreste executia programului.
+    - TREE: Consideram ca ce se afla in directorul dat ca parametru in tree se afla pe 
+        nivelul 0, iar apoi se aduna 1 pentru fiecare nivel. Nivelul reprezinta numarul de
+        taburi afisate inaintea numelui file-ului/directorului. Se porneste in ordine cu 
+        directoarele din target, iar dupa afisarea unui director se intra in el. In cazul 
+        file-ulrilor se afiseaza in ordine.
+    - MV: Functia verifica prima data daca elementul de redenumit exista sau nu, apoi daca 
+        noul nume a fost sau nu deja folosit. In cazul in care nu primim erori de la aceste 
+        doua verificari vor fi analizate doua cazuri. Primul este daca obiectul de redenumit 
+        este un file. Daca da, atunci ne folosim de functiile rm(...) si touch(...), deja 
+        implementate. Pentru cazul in care obiectul de redenumit este un director au fost 
+        create 3 functii aditionale, getLinkFiles(...), getLinkDirs(...) si delOnlyDir(...).
+        Prima functie returneaza un pointer la lista de file-uri a directorului de redenumit,
+        si in mod similar cea de a doua returneaza un pointer la lista de subdirectoare a 
+        directorului de redenumit. delOnlyDir(...) poate fi vazut ca fiind o combinatie intre
+        rmdir si rm, deoarece sterge un director din lista parintelui, fara insa a dezaloca 
+        continutul acestuia. Astfel, Se va crea un nou director cu noul nume, folosind mkdir,
+        caruia ii sunt actualizate listele de subdirectoare si file-uri cu cele ale 
+        directorului eliminat cu ajutorul "link-urilor" salvate anterior prin cele doua 
+        functii aditionale.
